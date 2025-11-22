@@ -1,0 +1,125 @@
+/* General page styling */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Page layout */
+.page {
+  padding: 20px;
+}
+
+/* Navbar */
+nav {
+  width: 100%;
+  background: #eeeeee;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.15);
+}
+
+nav ul {
+  display: flex;
+  gap: 20px;
+  list-style: none;
+  justify-content: center;
+  font-size: 18px;
+}
+
+nav ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+nav ul li a:hover {
+  color: #007bff;
+}
+
+/* Book list */
+.books-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+/* Book card */
+.book-card {
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 10px;
+  background: #ffffff;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.book-card img {
+  width: 100%;
+  border-radius: 8px;
+  height: 200px;
+  object-fit: cover;
+}
+
+/* Buttons */
+button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+button.add-btn {
+  background: #28a745;
+  color: white;
+}
+
+button.add-btn:hover {
+  background: #218838;
+}
+
+button.remove-btn {
+  background: #dc3545;
+  color: white;
+}
+
+button.remove-btn:hover {
+  background: #c82333;
+}
+
+/* Contact form */
+form input, form textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+form button {
+  background: #007bff;
+  color: white;
+}
+
+form button:hover {
+  background: #0056b3;
+}
+
+/* Cart styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+td, th {
+  padding: 12px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.total {
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 20px;
+}
