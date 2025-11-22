@@ -5,7 +5,7 @@ function BookDetails({ addToCart }) {
   const { id } = useParams();
   const book = books.find((b) => b.id === Number(id));
 
-  if (!book) return <h2 className="text-danger">Book not found</h2>;
+  if (!book) return <h2 className="text-danger">Book not Found</h2>;
 
   return (
     <div className="text-light">
@@ -18,7 +18,7 @@ function BookDetails({ addToCart }) {
         <p>{book.description}</p>
 
         <button className="btn btn-warning mt-3" onClick={() => addToCart(book)}>
-          Add to Cart
+          Add to cart
         </button>
 
         <Link to="/books" className="btn btn-outline-info mt-3 ms-3">

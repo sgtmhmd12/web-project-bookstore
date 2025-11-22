@@ -17,7 +17,7 @@ function Books({ addToCart }) {
 
   return (
     <div className="text-light">
-      <h1 className="text-info mb-4">Books Collection</h1>
+      <h1 className="text-info mb-4">Book Collection</h1>
 
       {/* Filters */}
       <div className="row mb-4">
@@ -64,7 +64,7 @@ function Books({ addToCart }) {
                   className="btn btn-warning w-100"
                   onClick={() => addToCart(book)}
                 >
-                  Add to Cart
+                  Add to cart
                 </button>
               </div>
             </div>

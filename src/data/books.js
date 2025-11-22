@@ -4,7 +4,7 @@ export const books = [
     title: "Clean Code",
     author: "Robert C. Martin",
     category: "Programming",
-    price: 29.99,
+    price: 30,
     description: "A handbook of agile software craftsmanship."
   },
   {
@@ -12,7 +12,7 @@ export const books = [
     title: "Atomic Habits",
     author: "James Clear",
     category: "Self-help",
-    price: 19.99,
+    price: 20,
     description: "Proven ways to build better habits."
   },
   {
@@ -20,7 +20,7 @@ export const books = [
     title: "The Pragmatic Programmer",
     author: "Andrew Hunt",
     category: "Programming",
-    price: 24.99,
+    price: 25,
     description: "A classic book for modern developers."
   }
 ];
