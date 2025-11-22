@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { books } from "../data/books"
+import { books } from "../data/books";
 
 function Books({ addToCart }) {
   const [search, setSearch] = useState("");
@@ -17,7 +17,7 @@ function Books({ addToCart }) {
 
   return (
     <div className="text-light">
-      <h1 className="text-info mb-4">Book Collection</h1>
+      <h1 className="text-info mb-4 text-center">Book Collection</h1>
 
       {/* Filters */}
       <div className="row mb-4">
@@ -44,17 +44,28 @@ function Books({ addToCart }) {
         </div>
       </div>
 
-      {/* Book Cards */}
+      {/* BOOK CARDS */}
       <div className="row">
         {filteredBooks.map((book) => (
           <div className="col-md-4 mb-4" key={book.id}>
             <div className="card bg-dark text-light border border-info shadow-lg h-100">
+
+              {/* IMAGE */}
+              <img
+                src={book.cover}
+                alt={book.title}
+                className="card-img-top"
+                style={{ height: "300px", objectFit: "cover" }}
+              />
+
               <div className="card-body">
                 <h4 className="card-title text-info">{book.title}</h4>
                 <p className="card-text">
                   <b>Author:</b> {book.author}
                 </p>
-                <p className="text-warning"><b>${book.price}</b></p>
+                <p className="text-warning">
+                  <b>${book.price}</b>
+                </p>
 
                 <Link to={`/books/${book.id}`} className="btn btn-info w-100 mb-2">
                   View Details
@@ -64,7 +75,7 @@ function Books({ addToCart }) {
                   className="btn btn-warning w-100"
                   onClick={() => addToCart(book)}
                 >
-                  Add to cart
+                  Add to Cart
                 </button>
               </div>
             </div>
