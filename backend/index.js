@@ -6,10 +6,20 @@ import path from "path";
 import fs from "fs";
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
-// serve static images
+/* ======================
+   MIDDLEWARE
+====================== */
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://YOUR-NETLIFY-SITE.netlify.app", // change later
+    ],
+  })
+);
+
+app.use(express.json());
 app.use(express.static("public"));
 
 /* ======================
@@ -36,10 +46,20 @@ const upload = multer({ storage });
    MYSQL CONNECTION
 ====================== */
 const db = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "books", // same DB, different table
+  host: process.env.MYSQLHOST || "localhost",
+  user: process.env.MYSQLUSER || "root",
+  password: process.env.MYSQLPASSWORD || "",
+  database: process.env.MYSQLDATABASE || "books",
+  port: process.env.MYSQLPORT || 3306,
+});
+
+/* CONNECT TO DB */
+db.connect((err) => {
+  if (err) {
+    console.error("❌ MySQL connection failed:", err.message);
+  } else {
+    console.log("✅ Connected to MySQL database");
+  }
 });
 
 /* ======================
@@ -49,14 +69,13 @@ app.get("/books", (req, res) => {
   const q = "SELECT * FROM books";
   db.query(q, (err, data) => {
     if (err) {
-      console.log(err);
+      console.error(err);
       return res.json([]);
     }
 
-    // convert image to base64 (same logic as students)
     for (const d of data) {
       const imgPath = `./images/${d.cover}`;
-      if (fs.existsSync(imgPath)) {
+      if (d.cover && fs.existsSync(imgPath)) {
         d.cover = fs.readFileSync(imgPath).toString("base64");
       } else {
         d.cover = null;
@@ -83,10 +102,7 @@ app.get("/books/:id", (req, res) => {
    ADD BOOK
 ====================== */
 app.post("/books/create", upload.single("cover"), (req, res) => {
-  const Title = req.body.Title;
-  const author = req.body.author;
-  const price = req.body.price;
-  const description = req.body.description;
+  const { Title, author, price, description } = req.body;
   const cover = req.file ? req.file.filename : null;
 
   const q =
@@ -126,10 +142,7 @@ app.delete("/books/delete/:id", (req, res) => {
 ====================== */
 app.post("/books/modify/:id", upload.single("cover"), (req, res) => {
   const id = req.params.id;
-  const Title = req.body.Title;
-  const author = req.body.author;
-  const price = req.body.price;
-  const description = req.body.description;
+  const { Title, author, price, description } = req.body;
   const cover = req.file ? req.file.filename : null;
 
   const q =
@@ -148,6 +161,8 @@ app.post("/books/modify/:id", upload.single("cover"), (req, res) => {
 /* ======================
    START SERVER
 ====================== */
-app.listen(5000, () => {
-  console.log("Connected to backend (BOOKS).");
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Backend running on port ${PORT}`);
 });
