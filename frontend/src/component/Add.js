@@ -1,8 +1,7 @@
 import axios from "axios";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
-const API_URL = "https://web-project-bookstore-production.up.railway.app";
+import { API_URL } from "../api";
 
 const Add = () => {
   const [book, setBook] = useState({
@@ -13,14 +12,11 @@ const Add = () => {
   });
 
   const [file, setFile] = useState(null);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setBook((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    setBook((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleFile = (e) => {
@@ -29,7 +25,7 @@ const Add = () => {
 
   const handleClick = async (e) => {
     e.preventDefault();
-    setError(false);
+    setError("");
 
     const formData = new FormData();
     formData.append("Title", book.Title);
@@ -42,58 +38,26 @@ const Add = () => {
       await axios.post(`${API_URL}/books/create`, formData);
       navigate("/books");
     } catch (err) {
-      console.error("ADD BOOK ERROR:", err.response?.data || err.message);
-      setError(true);
+      console.error(err.response?.data || err.message);
+      setError("Failed to add book");
     }
   };
 
   return (
-    <div className="book-form-page">
-      <div className="book-form">
-        <h1>Add New Book</h1>
+    <div>
+      <h1>Add Book</h1>
 
-        <input
-          type="text"
-          name="Title"
-          placeholder="Book Title"
-          onChange={handleChange}
-          required
-        />
+      <input name="Title" placeholder="Title" onChange={handleChange} />
+      <input name="author" placeholder="Author" onChange={handleChange} />
+      <input name="price" type="number" placeholder="Price" onChange={handleChange} />
+      <textarea name="description" placeholder="Description" onChange={handleChange} />
+      <input type="file" onChange={handleFile} />
 
-        <input
-          type="text"
-          name="author"
-          placeholder="Author"
-          onChange={handleChange}
-          required
-        />
+      <button onClick={handleClick}>Add</button>
 
-        <input
-          type="number"
-          name="price"
-          placeholder="Price"
-          onChange={handleChange}
-          required
-        />
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
-        <textarea
-          name="description"
-          placeholder="Description"
-          onChange={handleChange}
-        />
-
-        <input type="file" onChange={handleFile} />
-
-        <button onClick={handleClick}>Add</button>
-
-        {error && (
-          <p className="text-danger mt-2">
-            Something went wrong
-          </p>
-        )}
-
-        <Link to="/books">See all Books</Link>
-      </div>
+      <Link to="/books">See all books</Link>
     </div>
   );
 };
