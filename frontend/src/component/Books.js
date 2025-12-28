@@ -44,50 +44,47 @@ const Books = ({ addToCart }) => {
         </thead>
 
         <tbody>
-          {books.map(book => (
-            <tr key={book.ID}>
-              <td>
-                {book.cover && (
-                  <img
-                    src={`data:image/png;base64,${book.cover}`}
-                    width="80"
-                    alt=""
-                  />
-                )}
-              </td>
+         {books.map(book => (
+  <tr key={book.id}>
+    <td>
+      {book.cover && (
+        <img src={book.cover} width="80" alt="" />
+      )}
+    </td>
 
-              <td>{book.Title}</td>
-              <td>{book.author}</td>
-              <td>${book.price}</td>
+    <td>{book.Title}</td>
+    <td>{book.author}</td>
+    <td>${book.price}</td>
 
-              <td className="d-flex gap-2">
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={() => addToCart(book)}
-                >
-                  Add to Cart
-                </button>
+    <td className="d-flex gap-2">
+      <button
+        className="btn btn-primary btn-sm"
+        onClick={() => addToCart(book)}
+      >
+        Add to Cart
+      </button>
 
-                {isAdmin && (
-                  <>
-                    <Link
-                      className="btn btn-warning btn-sm"
-                      to={`/books/update/${book.ID}`}
-                    >
-                      Update
-                    </Link>
+      {isAdmin && (
+        <>
+          <Link
+            className="btn btn-warning btn-sm"
+            to={`/books/update/${book.id}`}
+          >
+            Update
+          </Link>
 
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleDelete(book.ID)}
-                    >
-                      Delete
-                    </button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
+          <button
+            className="btn btn-danger btn-sm"
+            onClick={() => handleDelete(book.id)}
+          >
+            Delete
+          </button>
+        </>
+      )}
+    </td>
+  </tr>
+))}
+
         </tbody>
       </table>
     </div>
