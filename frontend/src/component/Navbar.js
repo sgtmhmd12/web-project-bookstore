@@ -1,45 +1,56 @@
 import { Link } from "react-router-dom";
+import { auth } from "../firebase";
 
 function Navbar() {
+  const isAdmin = auth.currentUser?.email === "admin@bookstore.com";
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow">
       <div className="container">
-        {/* BRAND */}
         <Link className="navbar-brand fw-bold text-info" to="/">
           BookStore
         </Link>
 
-        {/* TOGGLER BUTTON (VERY IMPORTANT) */}
         <button
           className="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
+          data-bs-target="#navMenu"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* COLLAPSIBLE MENU */}
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/">Home</Link>
-            </li>
+        <div className="collapse navbar-collapse" id="navMenu">
+          <ul className="navbar-nav ms-auto gap-2">
 
             <li className="nav-item">
               <Link className="nav-link" to="/books">Books</Link>
             </li>
+
+            {isAdmin && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/books/add">
+                  Add Book
+                </Link>
+              </li>
+            )}
 
             <li className="nav-item">
               <Link className="nav-link" to="/cart">Cart</Link>
             </li>
 
             <li className="nav-item">
-              <Link className="nav-link" to="/login">Login</Link>
+              <Link className="nav-link" to="/features">Features</Link>
             </li>
+
+            <li className="nav-item">
+              <Link className="nav-link" to="/about">About</Link>
+            </li>
+
+            <li className="nav-item">
+              <Link className="nav-link" to="/contact">Contact</Link>
+            </li>
+
           </ul>
         </div>
       </div>
