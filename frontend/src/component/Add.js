@@ -10,9 +10,9 @@ const Add = () => {
     author: "",
     price: "",
     description: "",
-    cover: "", // image URL
   });
 
+  const [file, setFile] = useState(null);
   const [error, setError] = useState(false);
   const navigate = useNavigate();
 
@@ -23,19 +23,26 @@ const Add = () => {
     }));
   };
 
+  const handleFile = (e) => {
+    setFile(e.target.files[0]);
+  };
+
   const handleClick = async (e) => {
     e.preventDefault();
+    setError(false);
+
+    const formData = new FormData();
+    formData.append("Title", book.Title);
+    formData.append("author", book.author);
+    formData.append("price", book.price);
+    formData.append("description", book.description);
+    if (file) formData.append("cover", file);
 
     try {
-      await axios.post(`${API_URL}/books/create`, book, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
+      await axios.post(`${API_URL}/books/create`, formData);
       navigate("/books");
     } catch (err) {
-      console.error(err);
+      console.error("ADD BOOK ERROR:", err.response?.data || err.message);
       setError(true);
     }
   };
@@ -47,51 +54,42 @@ const Add = () => {
 
         <input
           type="text"
-          placeholder="Book Title"
           name="Title"
-          value={book.Title}
+          placeholder="Book Title"
           onChange={handleChange}
           required
         />
 
         <input
           type="text"
-          placeholder="Author"
           name="author"
-          value={book.author}
+          placeholder="Author"
           onChange={handleChange}
           required
         />
 
         <input
           type="number"
-          placeholder="Price"
           name="price"
-          value={book.price}
+          placeholder="Price"
           onChange={handleChange}
           required
         />
 
         <textarea
-          placeholder="Description"
           name="description"
-          value={book.description}
+          placeholder="Description"
           onChange={handleChange}
         />
 
-        {/* IMAGE URL INSTEAD OF FILE */}
-        <input
-          type="text"
-          placeholder="Cover Image URL"
-          name="cover"
-          value={book.cover}
-          onChange={handleChange}
-        />
+        <input type="file" onChange={handleFile} />
 
         <button onClick={handleClick}>Add</button>
 
         {error && (
-          <p className="text-danger mt-2">Something went wrong!</p>
+          <p className="text-danger mt-2">
+            Something went wrong
+          </p>
         )}
 
         <Link to="/books">See all Books</Link>
