@@ -6,6 +6,7 @@
     "dev": "nodemon index.js"
   },
   "dependencies": {
+    "@railway/cli": "^4.16.1",
     "cors": "^2.8.5",
     "express": "^4.22.1",
     "multer": "^1.4.5-lts.1",

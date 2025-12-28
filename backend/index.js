@@ -9,14 +9,7 @@ const app = express();
 /* ======================
    MIDDLEWARE
 ====================== */
-app.use(
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "https://YOUR-NETLIFY-SITE.netlify.app",
-    ],
-  })
-);
+app.use(cors());
 app.use(express.json());
 
 /* ======================
@@ -65,7 +58,7 @@ app.get("/", (req, res) => {
    GET ALL BOOKS
 ====================== */
 app.get("/books", (req, res) => {
-  db.query("SELECT * FROM books", (err, data) => {
+  db.query("SELECT * FROM book", (err, data) => {
     if (err) return res.status(500).json([]);
 
     const books = data.map((b) => ({
@@ -84,10 +77,10 @@ app.get("/books", (req, res) => {
 ====================== */
 app.post("/books/create", upload.single("cover"), (req, res) => {
   const { Title, author, price, description } = req.body;
-  const cover = req.file?.filename || null;
+  const cover = req.file ? req.file.filename : null;
 
   db.query(
-    "INSERT INTO books (Title, author, price, description, cover) VALUES (?,?,?,?,?)",
+    "INSERT INTO book (Title, author, price, description, cover) VALUES (?,?,?,?,?)",
     [Title, author, price, description, cover],
     (err, result) => {
       if (err) return res.status(500).json(err);
@@ -101,10 +94,10 @@ app.post("/books/create", upload.single("cover"), (req, res) => {
 ====================== */
 app.put("/books/modify/:id", upload.single("cover"), (req, res) => {
   const { Title, author, price, description } = req.body;
-  const cover = req.file?.filename || null;
+  const cover = req.file ? req.file.filename : null;
 
   db.query(
-    "UPDATE books SET Title=?, author=?, price=?, description=?, cover=? WHERE ID=?",
+    "UPDATE book SET Title=?, author=?, price=?, description=?, cover=? WHERE ID=?",
     [Title, author, price, description, cover, req.params.id],
     (err) => {
       if (err) return res.status(500).json(err);
@@ -117,7 +110,7 @@ app.put("/books/modify/:id", upload.single("cover"), (req, res) => {
    DELETE BOOK
 ====================== */
 app.delete("/books/delete/:id", (req, res) => {
-  db.query("DELETE FROM books WHERE ID=?", [req.params.id], (err) => {
+  db.query("DELETE FROM book WHERE ID=?", [req.params.id], (err) => {
     if (err) return res.status(500).json(err);
     res.json({ success: true });
   });
