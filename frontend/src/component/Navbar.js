@@ -1,15 +1,9 @@
 import { Link } from "react-router-dom";
 import { auth } from "../firebase";
 
-const isAdmin = auth.currentUser?.email === "admin@bookstore.com";
-{isAdmin && (
-  <Link className="nav-link" to="/books/add">
-    Add Book
-  </Link>
-)}
-
-
 function Navbar() {
+  const isAdmin = auth.currentUser?.email === "admin@bookstore.com";
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow">
       <div className="container">
@@ -28,21 +22,35 @@ function Navbar() {
 
         <div className="collapse navbar-collapse" id="navMenu">
           <ul className="navbar-nav ms-auto gap-2">
+
             <li className="nav-item">
               <Link className="nav-link" to="/books">Books</Link>
             </li>
+
+            {isAdmin && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/books/add">
+                  Add Book
+                </Link>
+              </li>
+            )}
+
             <li className="nav-item">
               <Link className="nav-link" to="/cart">Cart</Link>
             </li>
+
             <li className="nav-item">
               <Link className="nav-link" to="/features">Features</Link>
             </li>
+
             <li className="nav-item">
               <Link className="nav-link" to="/about">About</Link>
             </li>
+
             <li className="nav-item">
               <Link className="nav-link" to="/contact">Contact</Link>
             </li>
+
           </ul>
         </div>
       </div>
