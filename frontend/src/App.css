@@ -1,0 +1,231 @@
+/* ===============================
+   GLOBAL RESET (SAFE)
+================================ */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ===============================
+   BOOKS PAGE
+================================ */
+.books-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 25px 15px;
+}
+
+/* Header */
+.books-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.books-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+/* Add book button */
+.add-book-btn {
+  padding: 10px 18px;
+  background: #2563eb;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.add-book-btn:hover {
+  background: #1e4ed8;
+}
+
+/* ===============================
+   BOOK GRID
+================================ */
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+/* ===============================
+   BOOK CARD
+================================ */
+.book-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  transition: 0.25s;
+}
+
+.book-card:hover {
+  transform: translateY(-4px);
+}
+
+/* Book image */
+.book-card img {
+  width: 100%;
+  height: 230px;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+/* Title */
+.book-card h3 {
+  font-size: 17px;
+  margin-bottom: 6px;
+}
+
+/* Author / description */
+.book-card p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+/* Price */
+.book-price {
+  font-weight: 700;
+  font-size: 15px;
+  margin-top: 6px;
+}
+
+/* ===============================
+   CARD ACTIONS
+================================ */
+.book-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.book-actions button {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* Delete */
+.book-actions .delete {
+  background: #dc2626;
+  color: white;
+}
+
+.book-actions .delete:hover {
+  background: #b91c1c;
+}
+
+/* Update */
+.book-actions .update {
+  background: #16a34a;
+  color: white;
+}
+
+.book-actions .update:hover {
+  background: #15803d;
+}
+
+/* ===============================
+   ADD / UPDATE BOOK FORM
+================================ */
+.book-form-page {
+  display: flex;
+  justify-content: center;
+  padding: 40px 15px;
+}
+
+.book-form {
+  width: 100%;
+  max-width: 500px;
+  background: white;
+  padding: 24px;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+}
+
+/* Form title */
+.book-form h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Inputs */
+.book-form input,
+.book-form textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 14px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+}
+
+.book-form textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.book-form input:focus,
+.book-form textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+/* Submit button */
+.book-form button {
+  width: 100%;
+  padding: 12px;
+  background: #2563eb;
+  color: white;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.book-form button:hover {
+  background: #1e4ed8;
+}
+
+/* Back link */
+.book-form a {
+  display: block;
+  margin-top: 14px;
+  text-align: center;
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.book-form a:hover {
+  text-decoration: underline;
+}
+
+/* ===============================
+   RESPONSIVE
+================================ */
+@media (max-width: 600px) {
+  .books-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .book-card img {
+    height: 200px;
+  }
+}
