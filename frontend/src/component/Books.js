@@ -3,19 +3,22 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { auth } from "../firebase";
 
+const API_URL = "https://web-project-bookstore-production.up.railway.app";
+
 const Books = ({ addToCart }) => {
   const [books, setBooks] = useState([]);
 
   const isAdmin = auth.currentUser?.email === "admin@bookstore.com";
 
   useEffect(() => {
-    axios.get("http://localhost:5000/books")
+    axios
+      .get(`${API_URL}/books`)
       .then(res => setBooks(res.data))
       .catch(err => console.log(err));
   }, []);
 
   const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:5000/books/delete/${id}`);
+    await axios.delete(`${API_URL}/books/delete/${id}`);
     setBooks(prev => prev.filter(b => b.ID !== id));
   };
 
@@ -23,7 +26,6 @@ const Books = ({ addToCart }) => {
     <div>
       <h2>Books</h2>
 
-      {/* ADMIN ONLY */}
       {isAdmin && (
         <Link className="btn btn-success mb-3" to="/books/add">
           + Add Book
@@ -59,7 +61,6 @@ const Books = ({ addToCart }) => {
               <td>${book.price}</td>
 
               <td className="d-flex gap-2">
-                {/* EVERYONE */}
                 <button
                   className="btn btn-primary btn-sm"
                   onClick={() => addToCart(book)}
@@ -67,7 +68,6 @@ const Books = ({ addToCart }) => {
                   Add to Cart
                 </button>
 
-                {/* ADMIN ONLY */}
                 {isAdmin && (
                   <>
                     <Link
