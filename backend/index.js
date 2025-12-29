@@ -2,7 +2,7 @@ import express from "express";
 import mysql from "mysql2";
 import cors from "cors";
 import multer from "multer";
-import path from "path";
+import fs from "fs";
 
 const app = express();
 
@@ -13,15 +13,19 @@ app.use(cors());
 app.use(express.json());
 
 /* ======================
-   STATIC FILES
+   IMAGES FOLDER
 ====================== */
-app.use("/images", express.static("images"));
+const IMAGE_DIR = "images";
+if (!fs.existsSync(IMAGE_DIR)) {
+  fs.mkdirSync(IMAGE_DIR);
+}
+app.use("/images", express.static(IMAGE_DIR));
 
 /* ======================
-   MULTER CONFIG
+   MULTER
 ====================== */
 const storage = multer.diskStorage({
-  destination: "images/",
+  destination: IMAGE_DIR,
   filename: (req, file, cb) => {
     cb(null, Date.now() + "-" + file.originalname);
   },
@@ -29,21 +33,21 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 /* ======================
-   MYSQL CONNECTION (RAILWAY)
+   MYSQL CONNECTION (RAILWAY ONLY)
 ====================== */
 const db = mysql.createConnection({
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-  port: process.env.MYSQLPORT,
+  host: "mysql.railway.internal",
+  user: "root",
+  password: "KvxJwhfgdUaxvKKDeKWRQvipFqsHHsHD",
+  database: "railway",
+  port: 3306,
 });
 
 db.connect((err) => {
   if (err) {
-    console.error("❌ MySQL connection failed:", err.message);
+    console.error("❌ MySQL connection failed:", err);
   } else {
-    console.log("✅ Connected to MySQL database");
+    console.log("✅ Connected to MySQL");
   }
 });
 
@@ -51,24 +55,19 @@ db.connect((err) => {
    HEALTH CHECK
 ====================== */
 app.get("/", (req, res) => {
-  res.send("Backend is running 🚀");
+  res.send("Backend running 🚀");
 });
 
 /* ======================
    GET ALL BOOKS
 ====================== */
 app.get("/books", (req, res) => {
-  db.query("SELECT * FROM book", (err, data) => {
-    if (err) return res.status(500).json([]);
-
-    const books = data.map((b) => ({
-      ...b,
-      cover: b.cover
-        ? `${req.protocol}://${req.get("host")}/images/${b.cover}`
-        : null,
-    }));
-
-    res.json(books);
+  db.query("SELECT * FROM books", (err, data) => {
+    if (err) {
+      console.error("❌ SELECT ERROR:", err);
+      return res.json([]);
+    }
+    res.json(data);
   });
 });
 
@@ -79,47 +78,36 @@ app.post("/books/create", upload.single("cover"), (req, res) => {
   const { Title, author, price, description } = req.body;
   const cover = req.file ? req.file.filename : null;
 
-  db.query(
-    "INSERT INTO book (Title, author, price, description, cover) VALUES (?,?,?,?,?)",
-    [Title, author, price, description, cover],
-    (err, result) => {
-      if (err) return res.status(500).json(err);
-      res.json({ success: true, id: result.insertId });
-    }
-  );
-});
+  const sql =
+    "INSERT INTO books (Title, author, price, description, cover) VALUES (?,?,?,?,?)";
 
-/* ======================
-   UPDATE BOOK
-====================== */
-app.put("/books/modify/:id", upload.single("cover"), (req, res) => {
-  const { Title, author, price, description } = req.body;
-  const cover = req.file ? req.file.filename : null;
-
-  db.query(
-    "UPDATE book SET Title=?, author=?, price=?, description=?, cover=? WHERE ID=?",
-    [Title, author, price, description, cover, req.params.id],
-    (err) => {
-      if (err) return res.status(500).json(err);
-      res.json({ success: true });
+  db.query(sql, [Title, author, price, description, cover], (err, result) => {
+    if (err) {
+      console.error("❌ INSERT ERROR:", err);
+      return res.status(500).json(err);
     }
-  );
+    res.json({ success: true, id: result.insertId });
+  });
 });
 
 /* ======================
    DELETE BOOK
 ====================== */
 app.delete("/books/delete/:id", (req, res) => {
-  db.query("DELETE FROM book WHERE ID=?", [req.params.id], (err) => {
-    if (err) return res.status(500).json(err);
+  db.query("DELETE FROM books WHERE id=?", [req.params.id], (err) => {
+    if (err) {
+      console.error("❌ DELETE ERROR:", err);
+      return res.status(500).json(err);
+    }
     res.json({ success: true });
   });
 });
 
 /* ======================
-   START SERVER
+   START SERVER (CRITICAL FIX)
 ====================== */
 const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
 });
