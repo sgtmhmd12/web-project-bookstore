@@ -33,7 +33,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 /* ======================
-   MYSQL CONNECTION (RAILWAY ONLY)
+   MYSQL CONNECTION (RAILWAY INTERNAL)
+   ⚠️ DO NOT RUN LOCALLY
 ====================== */
 const db = mysql.createConnection({
   host: "mysql.railway.internal",
@@ -45,7 +46,8 @@ const db = mysql.createConnection({
 
 db.connect((err) => {
   if (err) {
-    console.error("❌ MySQL connection failed:", err);
+    console.error("❌ MySQL connection failed:", err.message);
+    process.exit(1); // IMPORTANT: crash so Railway shows error
   } else {
     console.log("✅ Connected to MySQL");
   }
@@ -65,7 +67,7 @@ app.get("/books", (req, res) => {
   db.query("SELECT * FROM books", (err, data) => {
     if (err) {
       console.error("❌ SELECT ERROR:", err);
-      return res.json([]);
+      return res.status(500).json(err);
     }
     res.json(data);
   });
@@ -104,7 +106,7 @@ app.delete("/books/delete/:id", (req, res) => {
 });
 
 /* ======================
-   START SERVER (CRITICAL FIX)
+   START SERVER (RAILWAY REQUIRED)
 ====================== */
 const PORT = process.env.PORT || 5000;
 
