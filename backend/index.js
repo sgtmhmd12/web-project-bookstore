@@ -22,7 +22,7 @@ if (!fs.existsSync(IMAGE_DIR)) {
 app.use("/images", express.static(IMAGE_DIR));
 
 /* ======================
-   MULTER
+   MULTER CONFIG
 ====================== */
 const storage = multer.diskStorage({
   destination: IMAGE_DIR,
@@ -63,7 +63,7 @@ app.get("/", (req, res) => {
 });
 
 /* ======================
-   GET ALL BOOKS
+   GET ALL BOOKS (WITH FULL IMAGE URL)
 ====================== */
 app.get("/books", (req, res) => {
   db.query("SELECT * FROM books", (err, data) => {
@@ -71,7 +71,15 @@ app.get("/books", (req, res) => {
       console.error("❌ SELECT ERROR:", err);
       return res.status(500).json(err);
     }
-    res.json(data);
+
+    const books = data.map((b) => ({
+      ...b,
+      cover: b.cover
+        ? `https://web-project-bookstore-production.up.railway.app/images/${b.cover}`
+        : null,
+    }));
+
+    res.json(books);
   });
 });
 
@@ -90,6 +98,7 @@ app.post("/books/create", upload.single("cover"), (req, res) => {
       console.error("❌ INSERT ERROR:", err);
       return res.status(500).json(err);
     }
+
     res.json({ success: true, id: result.insertId });
   });
 });
@@ -108,7 +117,7 @@ app.delete("/books/delete/:id", (req, res) => {
 });
 
 /* ======================
-   START SERVER
+   START SERVER (RAILWAY REQUIRED)
 ====================== */
 const PORT = process.env.PORT || 5000;
 
