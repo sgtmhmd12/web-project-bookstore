@@ -33,23 +33,25 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 /* ======================
-   MYSQL CONNECTION (RAILWAY INTERNAL)
-   ⚠️ DO NOT RUN LOCALLY
+   MYSQL CONNECTION POOL (RAILWAY SAFE)
 ====================== */
-const db = mysql.createConnection({
+const db = mysql.createPool({
   host: "mysql.railway.internal",
   user: "root",
   password: "KvxJwhfgdUaxvKKDeKWRQvipFqsHHsHD",
   database: "railway",
   port: 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
 
-db.connect((err) => {
+/* Optional: pool health check */
+db.query("SELECT 1", (err) => {
   if (err) {
-    console.error("❌ MySQL connection failed:", err.message);
-    process.exit(1); // IMPORTANT: crash so Railway shows error
+    console.error("❌ DB pool error:", err);
   } else {
-    console.log("✅ Connected to MySQL");
+    console.log("✅ DB pool ready");
   }
 });
 
@@ -106,7 +108,7 @@ app.delete("/books/delete/:id", (req, res) => {
 });
 
 /* ======================
-   START SERVER (RAILWAY REQUIRED)
+   START SERVER
 ====================== */
 const PORT = process.env.PORT || 5000;
 
