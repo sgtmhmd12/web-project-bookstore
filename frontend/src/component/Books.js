@@ -93,26 +93,18 @@ const Books = ({ addToCart }) => {
                   justifyContent: "center",
                 }}
               >
-                {book.cover ? (
-                  <img
-                    src={book.cover}
-                    alt={book.Title}
-                    style={{
-                      maxHeight: "100%",
-                      maxWidth: "100%",
-                      objectFit: "contain",
-                    }}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "";
-                      e.target.style.display = "none";
-                      e.target.parentElement.innerHTML =
-                        '<span class="text-muted">No Image</span>';
-                    }}
-                  />
-                ) : (
-                  <span className="text-muted">No Image</span>
-                )}
+                <img
+                  src={book.cover || "/book-placeholder.png"}
+                  alt={book.Title}
+                  style={{
+                    maxHeight: "100%",
+                    maxWidth: "100%",
+                    objectFit: "contain",
+                  }}
+                  onError={(e) => {
+                    e.target.src = "/book-placeholder.png";
+                  }}
+                />
               </div>
 
               {/* BODY */}
