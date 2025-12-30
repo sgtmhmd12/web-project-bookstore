@@ -82,7 +82,7 @@ const Books = ({ addToCart }) => {
         {books.map((book) => (
           <div className="col-lg-3 col-md-4 col-sm-6" key={book.ID}>
             <div className="card h-100 shadow-sm border-0 book-card">
-              
+
               {/* COVER */}
               <div
                 style={{
@@ -101,6 +101,13 @@ const Books = ({ addToCart }) => {
                       maxHeight: "100%",
                       maxWidth: "100%",
                       objectFit: "contain",
+                    }}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "";
+                      e.target.style.display = "none";
+                      e.target.parentElement.innerHTML =
+                        '<span class="text-muted">No Image</span>';
                     }}
                   />
                 ) : (
