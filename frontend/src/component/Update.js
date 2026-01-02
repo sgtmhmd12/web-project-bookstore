@@ -1,5 +1,5 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { auth } from "../firebase";
 
@@ -16,9 +16,9 @@ const Update = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // ======================
-  // FETCH BOOK
-  // ======================
+  /* ======================
+     FETCH BOOK
+  ====================== */
   useEffect(() => {
     axios
       .get(`${API_URL}/books/${id}`)
@@ -30,15 +30,15 @@ const Update = () => {
         setLoading(false);
       })
       .catch((err) => {
-        console.error("Fetch failed:", err);
+        console.error("Failed to load book:", err);
         alert("Failed to load book");
         setLoading(false);
       });
   }, [id]);
 
-  // ======================
-  // UPDATE BOOK
-  // ======================
+  /* ======================
+     UPDATE BOOK
+  ====================== */
   const handleUpdate = async (e) => {
     e.preventDefault();
 
@@ -48,8 +48,6 @@ const Update = () => {
     }
 
     try {
-      const token = await auth.currentUser.getIdToken();
-
       const formData = new FormData();
       formData.append("Title", Title);
       formData.append("author", author);
@@ -57,25 +55,27 @@ const Update = () => {
       formData.append("description", description);
       if (file) formData.append("cover", file);
 
-      await axios.put(`${API_URL}/books/update/${id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await axios.post(`${API_URL}/books/update/${id}`, formData);
 
       navigate("/books");
     } catch (err) {
       console.error("Update failed:", err);
-      alert("Update failed. Check console.");
+      alert("Update failed");
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "50px" }}>
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div style={styles.page}>
       <div style={styles.card}>
-        <h2 style={styles.title}>Update Book</h2>
+        <h2 style={styles.title}>✏️ Update Book</h2>
 
         <form onSubmit={handleUpdate} style={styles.form}>
           <input
@@ -96,10 +96,10 @@ const Update = () => {
 
           <input
             style={styles.input}
+            type="number"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="Price"
-            type="number"
             required
           />
 
@@ -130,13 +130,16 @@ const Update = () => {
   );
 };
 
+/* ======================
+   STYLES
+====================== */
 const styles = {
   page: {
     minHeight: "100vh",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    background: "#f5f6f8",
+    background: "#f4f6f8",
   },
   card: {
     width: "100%",

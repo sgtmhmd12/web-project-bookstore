@@ -8,8 +8,17 @@ const API_URL = "https://web-project-bookstore-production.up.railway.app";
 const Books = ({ addToCart }) => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  const isAdmin = auth.currentUser?.email === "admin@bookstore.com";
+  /* ======================
+     CHECK ADMIN (UI ONLY)
+  ====================== */
+  useEffect(() => {
+    const unsub = auth.onAuthStateChanged((user) => {
+      setIsAdmin(user?.email === "admin@bookstore.com");
+    });
+    return () => unsub();
+  }, []);
 
   /* ======================
      FETCH BOOKS
@@ -35,7 +44,7 @@ const Books = ({ addToCart }) => {
 
     try {
       await axios.delete(`${API_URL}/books/delete/${id}`);
-      setBooks((prev) => prev.filter((b) => b.ID !== id));
+      setBooks((prev) => prev.filter((b) => b.id !== id));
     } catch (err) {
       console.error("Delete failed:", err);
       alert("Failed to delete book");
@@ -80,8 +89,8 @@ const Books = ({ addToCart }) => {
       {/* BOOK GRID */}
       <div className="row g-4">
         {books.map((book) => (
-          <div className="col-lg-3 col-md-4 col-sm-6" key={book.ID}>
-            <div className="card h-100 shadow-sm border-0 book-card">
+          <div className="col-lg-3 col-md-4 col-sm-6" key={book.id}>
+            <div className="card h-100 shadow-sm border-0">
 
               {/* COVER */}
               <div
@@ -128,14 +137,14 @@ const Books = ({ addToCart }) => {
                     <div className="d-flex gap-2">
                       <Link
                         className="btn btn-warning btn-sm w-100"
-                        to={`/books/update/${book.ID}`}
+                        to={`/books/update/${book.id}`}
                       >
                         Update
                       </Link>
 
                       <button
                         className="btn btn-danger btn-sm w-100"
-                        onClick={() => handleDelete(book.ID)}
+                        onClick={() => handleDelete(book.id)}
                       >
                         Delete
                       </button>

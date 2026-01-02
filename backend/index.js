@@ -69,16 +69,16 @@ app.get("/books", (req, res) => {
 });
 
 /* ======================
-   GET BOOK BY ID  ✅ FIX 1
+   GET BOOK BY ID
 ====================== */
 app.get("/books/:id", (req, res) => {
   db.query(
-    "SELECT * FROM books WHERE id=?",
+    "SELECT * FROM books WHERE id = ?",
     [req.params.id],
     (err, data) => {
-      if (err || data.length === 0)
+      if (err || data.length === 0) {
         return res.status(404).json({ message: "Book not found" });
-
+      }
       res.json(data[0]);
     }
   );
@@ -102,9 +102,9 @@ app.post("/books/create", upload.single("cover"), (req, res) => {
 });
 
 /* ======================
-   UPDATE BOOK  ✅ FIX 2
+   UPDATE BOOK  ✅ FIXED (POST)
 ====================== */
-app.put("/books/update/:id", upload.single("cover"), (req, res) => {
+app.post("/books/update/:id", upload.single("cover"), (req, res) => {
   const { Title, author, price, description } = req.body;
   const { id } = req.params;
 
@@ -127,7 +127,10 @@ app.put("/books/update/:id", upload.single("cover"), (req, res) => {
   }
 
   db.query(sql, values, (err) => {
-    if (err) return res.status(500).json(err);
+    if (err) {
+      console.error("UPDATE ERROR:", err);
+      return res.status(500).json({ success: false });
+    }
     res.json({ success: true });
   });
 });
@@ -136,7 +139,7 @@ app.put("/books/update/:id", upload.single("cover"), (req, res) => {
    DELETE BOOK
 ====================== */
 app.delete("/books/delete/:id", (req, res) => {
-  db.query("DELETE FROM books WHERE id=?", [req.params.id], (err) => {
+  db.query("DELETE FROM books WHERE id = ?", [req.params.id], (err) => {
     if (err) return res.status(500).json(err);
     res.json({ success: true });
   });
