@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { auth } from "../firebase";
+import SafeImage from "./SafeImage";
 
-/* ✅ API URL WITH /api */
+/* ✅ API URL (NO /api) */
 const API_URL = "https://web-project-bookstore-production.up.railway.app";
-
-
 
 const Books = ({ addToCart }) => {
   const [books, setBooks] = useState([]);
@@ -30,7 +29,7 @@ const Books = ({ addToCart }) => {
     const fetchBooks = async () => {
       try {
         const res = await axios.get(`${API_URL}/books`);
-        setBooks(res.data); // ✅ backend already normalized
+        setBooks(res.data);
       } catch (err) {
         console.error("FETCH BOOKS ERROR:", err);
         alert("Failed to load books");
@@ -105,16 +104,13 @@ const Books = ({ addToCart }) => {
                   justifyContent: "center",
                 }}
               >
-                <img
-                  src={book.cover || "/book-placeholder.png"}
+                <SafeImage
+                  src={book.cover}
                   alt={book.title}
                   style={{
                     maxHeight: "100%",
                     maxWidth: "100%",
                     objectFit: "contain",
-                  }}
-                  onError={(e) => {
-                    e.target.src = "/book-placeholder.png";
                   }}
                 />
               </div>

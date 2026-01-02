@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import SafeImage from "./SafeImage";
 
-/* ✅ DEFINE API URL (NO /api) */
+/* ✅ API URL (NO /api) */
 const API_URL = "https://web-project-bookstore-production.up.railway.app";
 
 function BookDetails({ addToCart }) {
@@ -47,23 +48,29 @@ function BookDetails({ addToCart }) {
 
   return (
     <div className="row">
-      <div className="col-md-5">
-        {book.cover && (
-          <img
-            src={book.cover}
-            alt={book.title}
-            className="img-fluid rounded shadow"
-          />
-        )}
+      {/* IMAGE */}
+      <div className="col-md-5 d-flex align-items-center justify-content-center">
+        <SafeImage
+          src={book.cover}
+          alt={book.title}
+          className="img-fluid rounded shadow"
+          style={{
+            maxHeight: "420px",
+            objectFit: "contain",
+          }}
+        />
       </div>
 
+      {/* DETAILS */}
       <div className="col-md-7">
         <h2>{book.title}</h2>
         <h5 className="text-muted">{book.author}</h5>
 
         <p className="mt-3">{book.description}</p>
 
-        <h4 className="text-success">${Number(book.price).toFixed(2)}</h4>
+        <h4 className="text-success">
+          ${Number(book.price).toFixed(2)}
+        </h4>
 
         <button
           className="btn btn-primary mt-3"
