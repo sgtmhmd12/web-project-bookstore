@@ -17,28 +17,32 @@ import Update from "./component/Update";
 import Cart from "./component/Cart";
 import Login from "./component/Login";
 
-// 👇 separate component so we can use useLocation
+/* ======================
+   APP CONTENT
+====================== */
 function AppContent() {
   const location = useLocation();
 
   const [cart, setCart] = useState([]);
 
+  /* ADD TO CART */
   const addToCart = (book) => {
     setCart((prev) => [...prev, book]);
   };
 
+  /* REMOVE FROM CART (FIXED id) */
   const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((b) => b.ID !== id));
+    setCart((prev) => prev.filter((b) => b.id !== id));
   };
 
   return (
     <>
-      {/* ❌ Hide Navbar on login page */}
+      {/* Hide Navbar only on login page */}
       {location.pathname !== "/" && <Navbar />}
 
       <div className="container mt-4">
         <Routes>
-          {/* LOGIN FIRST */}
+          {/* AUTH */}
           <Route path="/" element={<Login />} />
 
           {/* MAIN PAGES */}
@@ -72,6 +76,9 @@ function AppContent() {
   );
 }
 
+/* ======================
+   ROOT APP
+====================== */
 function App() {
   return (
     <BrowserRouter>
