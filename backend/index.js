@@ -51,14 +51,21 @@ app.get("/", (req, res) => {
 });
 
 /* ======================
-   GET ALL BOOKS
+   GET ALL BOOKS  ✅ FIXED
 ====================== */
 app.get("/books", (req, res) => {
   db.query("SELECT * FROM books", (err, data) => {
-    if (err) return res.status(500).json(err);
+    if (err) {
+      console.error("SELECT ERROR:", err);
+      return res.status(500).json(err);
+    }
 
     const books = data.map((b) => ({
-      ...b,
+      id: b.ID, // 🔥 NORMALIZED
+      Title: b.Title,
+      author: b.author,
+      price: b.price,
+      description: b.description,
       cover: b.cover
         ? `https://web-project-bookstore-production.up.railway.app/images/${b.cover}`
         : null,
@@ -69,17 +76,29 @@ app.get("/books", (req, res) => {
 });
 
 /* ======================
-   GET BOOK BY ID
+   GET BOOK BY ID  ✅ FIXED
 ====================== */
 app.get("/books/:id", (req, res) => {
   db.query(
-    "SELECT * FROM books WHERE id = ?",
+    "SELECT * FROM books WHERE ID = ?",
     [req.params.id],
     (err, data) => {
       if (err || data.length === 0) {
         return res.status(404).json({ message: "Book not found" });
       }
-      res.json(data[0]);
+
+      const book = data[0];
+
+      res.json({
+        id: book.ID, // 🔥 NORMALIZED
+        Title: book.Title,
+        author: book.author,
+        price: book.price,
+        description: book.description,
+        cover: book.cover
+          ? `https://web-project-bookstore-production.up.railway.app/images/${book.cover}`
+          : null,
+      });
     }
   );
 });
@@ -95,33 +114,41 @@ app.post("/books/create", upload.single("cover"), (req, res) => {
     "INSERT INTO books (Title, author, price, description, cover) VALUES (?,?,?,?,?)",
     [Title, author, price, description, cover],
     (err, result) => {
-      if (err) return res.status(500).json(err);
-      res.json({ success: true, id: result.insertId });
+      if (err) {
+        console.error("INSERT ERROR:", err);
+        return res.status(500).json(err);
+      }
+
+      res.json({
+        success: true,
+        id: result.insertId,
+      });
     }
   );
 });
 
 /* ======================
-   UPDATE BOOK  ✅ FIXED (POST)
+   UPDATE BOOK
 ====================== */
 app.post("/books/update/:id", upload.single("cover"), (req, res) => {
   const { Title, author, price, description } = req.body;
   const { id } = req.params;
 
-  let sql, values;
+  let sql;
+  let values;
 
   if (req.file) {
     sql = `
       UPDATE books
       SET Title=?, author=?, price=?, description=?, cover=?
-      WHERE id=?
+      WHERE ID=?
     `;
     values = [Title, author, price, description, req.file.filename, id];
   } else {
     sql = `
       UPDATE books
       SET Title=?, author=?, price=?, description=?
-      WHERE id=?
+      WHERE ID=?
     `;
     values = [Title, author, price, description, id];
   }
@@ -139,8 +166,11 @@ app.post("/books/update/:id", upload.single("cover"), (req, res) => {
    DELETE BOOK
 ====================== */
 app.delete("/books/delete/:id", (req, res) => {
-  db.query("DELETE FROM books WHERE id = ?", [req.params.id], (err) => {
-    if (err) return res.status(500).json(err);
+  db.query("DELETE FROM books WHERE ID = ?", [req.params.id], (err) => {
+    if (err) {
+      console.error("DELETE ERROR:", err);
+      return res.status(500).json(err);
+    }
     res.json({ success: true });
   });
 });
