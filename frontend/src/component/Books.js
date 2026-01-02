@@ -14,26 +14,29 @@ const Books = ({ addToCart }) => {
      CHECK ADMIN (UI ONLY)
   ====================== */
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       setIsAdmin(user?.email === "admin@bookstore.com");
     });
-    return () => unsub();
+    return () => unsubscribe();
   }, []);
 
   /* ======================
      FETCH BOOKS
   ====================== */
   useEffect(() => {
-    axios
-      .get(`${API_URL}/books`)
-      .then((res) => {
-        setBooks(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
+    const fetchBooks = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/books`);
+        setBooks(res.data); // backend already returns { id: ... }
+      } catch (err) {
         console.error("Failed to fetch books:", err);
+        alert("Failed to load books");
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchBooks();
   }, []);
 
   /* ======================
@@ -44,10 +47,10 @@ const Books = ({ addToCart }) => {
 
     try {
       await axios.delete(`${API_URL}/books/delete/${id}`);
-      setBooks((prev) => prev.filter((b) => b.id !== id));
+      setBooks((prev) => prev.filter((book) => book.id !== id));
     } catch (err) {
       console.error("Delete failed:", err);
-      alert("Failed to delete book");
+      alert("Delete failed");
     }
   };
 
@@ -80,7 +83,7 @@ const Books = ({ addToCart }) => {
         <h2 className="fw-bold">📚 Books</h2>
 
         {isAdmin && (
-          <Link className="btn btn-success" to="/books/add">
+          <Link to="/books/add" className="btn btn-success">
             + Add Book
           </Link>
         )}
@@ -91,7 +94,6 @@ const Books = ({ addToCart }) => {
         {books.map((book) => (
           <div className="col-lg-3 col-md-4 col-sm-6" key={book.id}>
             <div className="card h-100 shadow-sm border-0">
-
               {/* COVER */}
               <div
                 style={{
@@ -136,8 +138,8 @@ const Books = ({ addToCart }) => {
                   {isAdmin && (
                     <div className="d-flex gap-2">
                       <Link
-                        className="btn btn-warning btn-sm w-100"
                         to={`/books/update/${book.id}`}
+                        className="btn btn-warning btn-sm w-100"
                       >
                         Update
                       </Link>

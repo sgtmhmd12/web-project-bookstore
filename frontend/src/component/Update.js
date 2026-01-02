@@ -6,35 +6,38 @@ import { auth } from "../firebase";
 const API_URL = "https://web-project-bookstore-production.up.railway.app";
 
 const Update = () => {
-  const [Title, setTitle] = useState("");
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const navigate = useNavigate();
-  const { id } = useParams();
-
   /* ======================
      FETCH BOOK
   ====================== */
   useEffect(() => {
-    axios
-      .get(`${API_URL}/books/${id}`)
-      .then((res) => {
+    const fetchBook = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/books/${id}`);
         setTitle(res.data.Title);
         setAuthor(res.data.author);
         setPrice(res.data.price);
         setDescription(res.data.description);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Failed to load book:", err);
         alert("Failed to load book");
+        navigate("/books");
+      } finally {
         setLoading(false);
-      });
-  }, [id]);
+      }
+    };
+
+    fetchBook();
+  }, [id, navigate]);
 
   /* ======================
      UPDATE BOOK
@@ -49,7 +52,7 @@ const Update = () => {
 
     try {
       const formData = new FormData();
-      formData.append("Title", Title);
+      formData.append("Title", title);
       formData.append("author", author);
       formData.append("price", price);
       formData.append("description", description);
@@ -64,6 +67,9 @@ const Update = () => {
     }
   };
 
+  /* ======================
+     UI STATES
+  ====================== */
   if (loading) {
     return (
       <div style={{ textAlign: "center", marginTop: "50px" }}>
@@ -80,7 +86,7 @@ const Update = () => {
         <form onSubmit={handleUpdate} style={styles.form}>
           <input
             style={styles.input}
-            value={Title}
+            value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="Title"
             required
@@ -120,6 +126,7 @@ const Update = () => {
             <button type="submit" style={styles.primary}>
               Update
             </button>
+
             <Link to="/books" style={styles.secondary}>
               Cancel
             </Link>

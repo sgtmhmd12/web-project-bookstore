@@ -33,7 +33,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 /* ======================
-   MYSQL CONNECTION POOL
+   MYSQL CONNECTION
 ====================== */
 const db = mysql.createPool({
   host: "mysql.railway.internal",
@@ -51,7 +51,7 @@ app.get("/", (req, res) => {
 });
 
 /* ======================
-   GET ALL BOOKS  ✅ FIXED
+   GET ALL BOOKS
 ====================== */
 app.get("/books", (req, res) => {
   db.query("SELECT * FROM books", (err, data) => {
@@ -61,7 +61,7 @@ app.get("/books", (req, res) => {
     }
 
     const books = data.map((b) => ({
-      id: b.ID, // 🔥 NORMALIZED
+      id: b.ID, // ✅ normalize ID → id
       Title: b.Title,
       author: b.author,
       price: b.price,
@@ -76,7 +76,7 @@ app.get("/books", (req, res) => {
 });
 
 /* ======================
-   GET BOOK BY ID  ✅ FIXED
+   GET BOOK BY ID
 ====================== */
 app.get("/books/:id", (req, res) => {
   db.query(
@@ -87,16 +87,15 @@ app.get("/books/:id", (req, res) => {
         return res.status(404).json({ message: "Book not found" });
       }
 
-      const book = data[0];
-
+      const b = data[0];
       res.json({
-        id: book.ID, // 🔥 NORMALIZED
-        Title: book.Title,
-        author: book.author,
-        price: book.price,
-        description: book.description,
-        cover: book.cover
-          ? `https://web-project-bookstore-production.up.railway.app/images/${book.cover}`
+        id: b.ID, // ✅ normalize
+        Title: b.Title,
+        author: b.author,
+        price: b.price,
+        description: b.description,
+        cover: b.cover
+          ? `https://web-project-bookstore-production.up.railway.app/images/${b.cover}`
           : null,
       });
     }
@@ -118,11 +117,7 @@ app.post("/books/create", upload.single("cover"), (req, res) => {
         console.error("INSERT ERROR:", err);
         return res.status(500).json(err);
       }
-
-      res.json({
-        success: true,
-        id: result.insertId,
-      });
+      res.json({ success: true, id: result.insertId });
     }
   );
 });
@@ -134,8 +129,7 @@ app.post("/books/update/:id", upload.single("cover"), (req, res) => {
   const { Title, author, price, description } = req.body;
   const { id } = req.params;
 
-  let sql;
-  let values;
+  let sql, values;
 
   if (req.file) {
     sql = `
@@ -156,7 +150,7 @@ app.post("/books/update/:id", upload.single("cover"), (req, res) => {
   db.query(sql, values, (err) => {
     if (err) {
       console.error("UPDATE ERROR:", err);
-      return res.status(500).json({ success: false });
+      return res.status(500).json(err);
     }
     res.json({ success: true });
   });
