@@ -1,10 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useParams, Navigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { auth } from "../firebase";
 
+const API_URL = "https://web-project-bookstore-production.up.railway.app"; // change later to Railway
+
 const Update = () => {
-  // ✅ ALL HOOKS FIRST (NO CONDITIONS)
   const [Title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [price, setPrice] = useState("");
@@ -14,9 +15,9 @@ const Update = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // ✅ FETCH BOOK
+  // Fetch book
   useEffect(() => {
-    axios.get(`http://localhost:5000/books/${id}`).then((res) => {
+    axios.get(`${API_URL}/books/${id}`).then((res) => {
       setTitle(res.data.Title);
       setAuthor(res.data.author);
       setPrice(res.data.price);
@@ -24,13 +25,16 @@ const Update = () => {
     });
   }, [id]);
 
-  // 🔐 ADMIN GUARD (AFTER HOOKS)
-  if (auth.currentUser?.email !== "admin@bookstore.com") {
-    return <Navigate to="/books" replace />;
-  }
-
   const handleUpdate = async (e) => {
     e.preventDefault();
+
+    if (!auth.currentUser) {
+      alert("You must be logged in");
+      return;
+    }
+
+    // 🔐 Firebase ID token (NORMAL Firebase usage)
+    const token = await auth.currentUser.getIdToken();
 
     const formData = new FormData();
     formData.append("Title", Title);
@@ -39,7 +43,12 @@ const Update = () => {
     formData.append("description", description);
     if (file) formData.append("cover", file);
 
-    await axios.put(`http://localhost:5000/books/update/${id}`, formData);
+    await axios.put(`${API_URL}/books/update/${id}`, formData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
     navigate("/books");
   };
 
