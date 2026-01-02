@@ -6,10 +6,8 @@ import { auth } from "../firebase";
 const API_URL = "https://web-project-bookstore-production.up.railway.app";
 
 const Update = () => {
- if (!id) {
-  alert("Invalid book ID");
-  window.location.href = "/books";
-}
+  // ✅ hooks FIRST
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
@@ -23,13 +21,30 @@ const Update = () => {
      FETCH BOOK
   ====================== */
   useEffect(() => {
+    // ✅ guard AFTER hooks
+    if (!id) {
+      alert("Invalid book ID");
+      navigate("/books");
+      return;
+    }
+
     const fetchBook = async () => {
       try {
         const res = await axios.get(`${API_URL}/books/${id}`);
-        setTitle(res.data.Title);
-        setAuthor(res.data.author);
-        setPrice(res.data.price);
-        setDescription(res.data.description);
+
+        // 🔥 normalize backend response
+        const book = {
+          id: res.data.id ?? res.data.ID,
+          Title: res.data.Title,
+          author: res.data.author,
+          price: res.data.price,
+          description: res.data.description,
+        };
+
+        setTitle(book.Title);
+        setAuthor(book.author);
+        setPrice(book.price);
+        setDescription(book.description);
       } catch (err) {
         console.error("Failed to load book:", err);
         alert("Failed to load book");
