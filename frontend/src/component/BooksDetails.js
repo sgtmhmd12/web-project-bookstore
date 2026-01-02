@@ -3,9 +3,8 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import SafeImage from "./SafeImage";
 
-/* ✅ API URL (NO /api) */
-const API_URL =
-  "https://web-project-bookstore-production.up.railway.app/api";
+import { API_URL } from "../api";
+
 
 
 function BookDetails({ addToCart }) {

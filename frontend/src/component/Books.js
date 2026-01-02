@@ -3,10 +3,8 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { auth } from "../firebase";
 import SafeImage from "./SafeImage";
+import { API_URL } from "../api";
 
-/* ✅ API URL (NO /api) */
-const API_URL =
-  "https://web-project-bookstore-production.up.railway.app/api";
 
 
 const Books = ({ addToCart }) => {

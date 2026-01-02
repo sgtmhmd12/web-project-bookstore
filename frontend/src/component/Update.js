@@ -2,10 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { auth } from "../firebase";
+import { API_URL } from "../api";
 
-/* ✅ API URL WITH /api */
-const API_URL =
-  "https://web-project-bookstore-production.up.railway.app/api";
 
 const Update = () => {
   const { id } = useParams();
