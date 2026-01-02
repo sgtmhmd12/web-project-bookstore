@@ -33,7 +33,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 /* ======================
-   MYSQL CONNECTION POOL (RAILWAY SAFE)
+   MYSQL CONNECTION POOL
 ====================== */
 const db = mysql.createPool({
   host: "mysql.railway.internal",
@@ -41,18 +41,6 @@ const db = mysql.createPool({
   password: "KvxJwhfgdUaxvKKDeKWRQvipFqsHHsHD",
   database: "railway",
   port: 3306,
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
-
-/* Optional: pool health check */
-db.query("SELECT 1", (err) => {
-  if (err) {
-    console.error("❌ DB pool error:", err);
-  } else {
-    console.log("✅ DB pool ready");
-  }
 });
 
 /* ======================
@@ -63,14 +51,11 @@ app.get("/", (req, res) => {
 });
 
 /* ======================
-   GET ALL BOOKS (WITH FULL IMAGE URL)
+   GET ALL BOOKS
 ====================== */
 app.get("/books", (req, res) => {
   db.query("SELECT * FROM books", (err, data) => {
-    if (err) {
-      console.error("❌ SELECT ERROR:", err);
-      return res.status(500).json(err);
-    }
+    if (err) return res.status(500).json(err);
 
     const books = data.map((b) => ({
       ...b,
@@ -84,22 +69,66 @@ app.get("/books", (req, res) => {
 });
 
 /* ======================
+   GET BOOK BY ID  ✅ FIX 1
+====================== */
+app.get("/books/:id", (req, res) => {
+  db.query(
+    "SELECT * FROM books WHERE id=?",
+    [req.params.id],
+    (err, data) => {
+      if (err || data.length === 0)
+        return res.status(404).json({ message: "Book not found" });
+
+      res.json(data[0]);
+    }
+  );
+});
+
+/* ======================
    ADD BOOK
 ====================== */
 app.post("/books/create", upload.single("cover"), (req, res) => {
   const { Title, author, price, description } = req.body;
   const cover = req.file ? req.file.filename : null;
 
-  const sql =
-    "INSERT INTO books (Title, author, price, description, cover) VALUES (?,?,?,?,?)";
-
-  db.query(sql, [Title, author, price, description, cover], (err, result) => {
-    if (err) {
-      console.error("❌ INSERT ERROR:", err);
-      return res.status(500).json(err);
+  db.query(
+    "INSERT INTO books (Title, author, price, description, cover) VALUES (?,?,?,?,?)",
+    [Title, author, price, description, cover],
+    (err, result) => {
+      if (err) return res.status(500).json(err);
+      res.json({ success: true, id: result.insertId });
     }
+  );
+});
 
-    res.json({ success: true, id: result.insertId });
+/* ======================
+   UPDATE BOOK  ✅ FIX 2
+====================== */
+app.put("/books/update/:id", upload.single("cover"), (req, res) => {
+  const { Title, author, price, description } = req.body;
+  const { id } = req.params;
+
+  let sql, values;
+
+  if (req.file) {
+    sql = `
+      UPDATE books
+      SET Title=?, author=?, price=?, description=?, cover=?
+      WHERE id=?
+    `;
+    values = [Title, author, price, description, req.file.filename, id];
+  } else {
+    sql = `
+      UPDATE books
+      SET Title=?, author=?, price=?, description=?
+      WHERE id=?
+    `;
+    values = [Title, author, price, description, id];
+  }
+
+  db.query(sql, values, (err) => {
+    if (err) return res.status(500).json(err);
+    res.json({ success: true });
   });
 });
 
@@ -108,19 +137,15 @@ app.post("/books/create", upload.single("cover"), (req, res) => {
 ====================== */
 app.delete("/books/delete/:id", (req, res) => {
   db.query("DELETE FROM books WHERE id=?", [req.params.id], (err) => {
-    if (err) {
-      console.error("❌ DELETE ERROR:", err);
-      return res.status(500).json(err);
-    }
+    if (err) return res.status(500).json(err);
     res.json({ success: true });
   });
 });
 
 /* ======================
-   START SERVER (RAILWAY REQUIRED)
+   START SERVER
 ====================== */
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
   console.log(`🚀 Backend running on port ${PORT}`);
 });
