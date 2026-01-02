@@ -3,7 +3,9 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { auth } from "../firebase";
 
-const API_URL = "https://web-project-bookstore-production.up.railway.app";
+/* ✅ API URL WITH /api */
+const API_URL =
+  "https://web-project-bookstore-production.up.railway.app/api";
 
 const Books = ({ addToCart }) => {
   const [books, setBooks] = useState([]);
@@ -23,30 +25,21 @@ const Books = ({ addToCart }) => {
   /* ======================
      FETCH BOOKS
   ====================== */
-useEffect(() => {
-  const fetchBooks = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/books`);
-      setBooks(
-        res.data.map((b) => ({
-          id: b.id ?? b.ID,   // 🔥 normalize once
-          Title: b.Title,
-          author: b.author,
-          price: b.price,
-          description: b.description,
-          cover: b.cover,
-        }))
-      );
-    } catch (err) {
-      console.error(err);
-      alert("Failed to load books");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/books`);
+        setBooks(res.data); // ✅ backend already normalized
+      } catch (err) {
+        console.error("FETCH BOOKS ERROR:", err);
+        alert("Failed to load books");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  fetchBooks();
-}, []);
+    fetchBooks();
+  }, []);
 
   /* ======================
      DELETE BOOK
@@ -58,7 +51,7 @@ useEffect(() => {
       await axios.delete(`${API_URL}/books/delete/${id}`);
       setBooks((prev) => prev.filter((book) => book.id !== id));
     } catch (err) {
-      console.error("Delete failed:", err);
+      console.error("DELETE ERROR:", err);
       alert("Delete failed");
     }
   };
@@ -87,7 +80,6 @@ useEffect(() => {
   ====================== */
   return (
     <div className="container mt-4">
-      {/* HEADER */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-bold">📚 Books</h2>
 
@@ -98,7 +90,6 @@ useEffect(() => {
         )}
       </div>
 
-      {/* BOOK GRID */}
       <div className="row g-4">
         {books.map((book) => (
           <div className="col-lg-3 col-md-4 col-sm-6" key={book.id}>
@@ -115,7 +106,7 @@ useEffect(() => {
               >
                 <img
                   src={book.cover || "/book-placeholder.png"}
-                  alt={book.Title}
+                  alt={book.title}
                   style={{
                     maxHeight: "100%",
                     maxWidth: "100%",
@@ -129,7 +120,7 @@ useEffect(() => {
 
               {/* BODY */}
               <div className="card-body d-flex flex-column">
-                <h6 className="fw-bold mb-1">{book.Title}</h6>
+                <h6 className="fw-bold mb-1">{book.title}</h6>
                 <small className="text-muted">{book.author}</small>
 
                 <p className="fw-bold text-success mt-2 mb-3">

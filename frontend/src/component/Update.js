@@ -3,7 +3,9 @@ import axios from "axios";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { auth } from "../firebase";
 
-const API_URL = "https://web-project-bookstore-production.up.railway.app";
+/* ✅ API URL WITH /api */
+const API_URL =
+  "https://web-project-bookstore-production.up.railway.app/api";
 
 const Update = () => {
   const { id } = useParams();
@@ -19,32 +21,32 @@ const Update = () => {
   /* ======================
      FETCH BOOK
   ====================== */
-useEffect(() => {
-  if (!id) {
-    alert("Invalid book ID");
-    navigate("/books");
-    return;
-  }
-
-  const fetchBook = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/books/${id}`);
-
-      setTitle(res.data.title);        // ✅ lowercase
-      setAuthor(res.data.author);
-      setPrice(res.data.price);
-      setDescription(res.data.description);
-    } catch (err) {
-      console.error("FETCH BOOK ERROR:", err.response || err);
-      alert("Failed to load book");
+  useEffect(() => {
+    if (!id) {
+      alert("Invalid book ID");
       navigate("/books");
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
 
-  fetchBook();
-}, [id, navigate]);
+    const fetchBook = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/books/${id}`);
+
+        setTitle(res.data.title);
+        setAuthor(res.data.author);
+        setPrice(res.data.price);
+        setDescription(res.data.description);
+      } catch (err) {
+        console.error("FETCH BOOK ERROR:", err.response || err);
+        alert("Failed to load book");
+        navigate("/books");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBook();
+  }, [id, navigate]);
 
   /* ======================
      UPDATE BOOK
@@ -59,7 +61,7 @@ useEffect(() => {
 
     try {
       const formData = new FormData();
-      formData.append("title", title);       // ✅ FIXED
+      formData.append("title", title);
       formData.append("author", author);
       formData.append("price", price);
       formData.append("description", description);
@@ -68,19 +70,25 @@ useEffect(() => {
         formData.append("cover", file);
       }
 
-      await axios.post(`${API_URL}/books/update/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await axios.post(
+        `${API_URL}/books/update/${id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
 
       navigate("/books");
     } catch (err) {
-      console.error("Update failed:", err);
+      console.error("UPDATE ERROR:", err.response || err);
       alert("Update failed");
     }
   };
 
   if (loading) {
-    return <div style={{ textAlign: "center", marginTop: 50 }}>Loading...</div>;
+    return (
+      <div style={{ textAlign: "center", marginTop: 50 }}>
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -122,7 +130,10 @@ useEffect(() => {
             required
           />
 
-          <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+          <input
+            type="file"
+            onChange={(e) => setFile(e.target.files[0])}
+          />
 
           <div style={styles.actions}>
             <button type="submit" style={styles.primary}>
@@ -139,6 +150,9 @@ useEffect(() => {
   );
 };
 
+/* ======================
+   STYLES
+====================== */
 const styles = {
   page: {
     minHeight: "100vh",

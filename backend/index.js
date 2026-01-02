@@ -19,11 +19,9 @@ app.use(express.json());
    IMAGES FOLDER
 ====================== */
 const IMAGE_DIR = "images";
-
 if (!fs.existsSync(IMAGE_DIR)) {
   fs.mkdirSync(IMAGE_DIR);
 }
-
 app.use("/images", express.static(path.resolve(IMAGE_DIR)));
 
 /* ======================
@@ -35,11 +33,10 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
-
 const upload = multer({ storage });
 
 /* ======================
-   MYSQL CONNECTION (RAILWAY)
+   MYSQL CONNECTION
 ====================== */
 const db = mysql.createPool({
   host: process.env.MYSQLHOST || "mysql.railway.internal",
@@ -59,83 +56,65 @@ app.get("/", (req, res) => {
 /* ======================
    GET ALL BOOKS
 ====================== */
-app.get("/books", (req, res) => {
+app.get("/api/books", (req, res) => {
   db.query("SELECT * FROM books", (err, rows) => {
-    if (err) {
-      console.error("SELECT ERROR:", err);
-      return res.status(500).json({ error: "Database error" });
-    }
+    if (err) return res.status(500).json({ error: "Database error" });
 
-    const books = rows.map((b) => ({
-      id: b.ID,
-      title: b.Title,
-      author: b.author,
-      price: b.price,
-      description: b.description,
-      cover: b.cover
-        ? `${req.protocol}://${req.get("host")}/images/${b.cover}`
-        : null,
-    }));
-
-    res.json(books);
+    res.json(
+      rows.map((b) => ({
+        id: b.ID,
+        title: b.Title,
+        author: b.author,
+        price: b.price,
+        description: b.description,
+        cover: b.cover
+          ? `${req.protocol}://${req.get("host")}/images/${b.cover}`
+          : null,
+      }))
+    );
   });
 });
 
 /* ======================
    GET BOOK BY ID
 ====================== */
-app.get("/books/:id", (req, res) => {
-  const { id } = req.params;
+app.get("/api/books/:id", (req, res) => {
+  db.query(
+    "SELECT * FROM books WHERE ID = ?",
+    [req.params.id],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: "Database error" });
+      if (rows.length === 0)
+        return res.status(404).json({ message: "Book not found" });
 
-  db.query("SELECT * FROM books WHERE ID = ?", [id], (err, rows) => {
-    if (err) {
-      console.error("SELECT BY ID ERROR:", err);
-      return res.status(500).json({ error: "Database error" });
+      const b = rows[0];
+      res.json({
+        id: b.ID,
+        title: b.Title,
+        author: b.author,
+        price: b.price,
+        description: b.description,
+        cover: b.cover
+          ? `${req.protocol}://${req.get("host")}/images/${b.cover}`
+          : null,
+      });
     }
-
-    if (rows.length === 0) {
-      return res.status(404).json({ message: "Book not found" });
-    }
-
-    const b = rows[0];
-
-    res.json({
-      id: b.ID,
-      title: b.Title,
-      author: b.author,
-      price: b.price,
-      description: b.description,
-      cover: b.cover
-        ? `${req.protocol}://${req.get("host")}/images/${b.cover}`
-        : null,
-    });
-  });
+  );
 });
 
 /* ======================
    ADD BOOK
 ====================== */
-app.post("/books/create", upload.single("cover"), (req, res) => {
+app.post("/api/books/create", upload.single("cover"), (req, res) => {
   const { title, author, price, description } = req.body;
   const cover = req.file ? req.file.filename : null;
-
-  if (!title || !author || !price) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
 
   db.query(
     "INSERT INTO books (Title, author, price, description, cover) VALUES (?, ?, ?, ?, ?)",
     [title, author, price, description, cover],
     (err, result) => {
-      if (err) {
-        console.error("INSERT ERROR:", err);
-        return res.status(500).json({ error: "Insert failed" });
-      }
-
-      res.json({
-        success: true,
-        id: result.insertId,
-      });
+      if (err) return res.status(500).json({ error: "Insert failed" });
+      res.json({ success: true, id: result.insertId });
     }
   );
 });
@@ -143,35 +122,24 @@ app.post("/books/create", upload.single("cover"), (req, res) => {
 /* ======================
    UPDATE BOOK
 ====================== */
-app.post("/books/update/:id", upload.single("cover"), (req, res) => {
-  const { id } = req.params;
+app.post("/api/books/update/:id", upload.single("cover"), (req, res) => {
   const { title, author, price, description } = req.body;
+  const { id } = req.params;
 
-  let sql;
-  let values;
+  let sql =
+    "UPDATE books SET Title=?, author=?, price=?, description=?";
+  let values = [title, author, price, description];
 
   if (req.file) {
-    sql = `
-      UPDATE books
-      SET Title=?, author=?, price=?, description=?, cover=?
-      WHERE ID=?
-    `;
-    values = [title, author, price, description, req.file.filename, id];
-  } else {
-    sql = `
-      UPDATE books
-      SET Title=?, author=?, price=?, description=?
-      WHERE ID=?
-    `;
-    values = [title, author, price, description, id];
+    sql += ", cover=?";
+    values.push(req.file.filename);
   }
 
-  db.query(sql, values, (err) => {
-    if (err) {
-      console.error("UPDATE ERROR:", err);
-      return res.status(500).json({ error: "Update failed" });
-    }
+  sql += " WHERE ID=?";
+  values.push(id);
 
+  db.query(sql, values, (err) => {
+    if (err) return res.status(500).json({ error: "Update failed" });
     res.json({ success: true });
   });
 });
@@ -179,33 +147,28 @@ app.post("/books/update/:id", upload.single("cover"), (req, res) => {
 /* ======================
    DELETE BOOK
 ====================== */
-app.delete("/books/delete/:id", (req, res) => {
-  const { id } = req.params;
-
-  db.query("DELETE FROM books WHERE ID = ?", [id], (err) => {
-    if (err) {
-      console.error("DELETE ERROR:", err);
-      return res.status(500).json({ error: "Delete failed" });
+app.delete("/api/books/delete/:id", (req, res) => {
+  db.query(
+    "DELETE FROM books WHERE ID = ?",
+    [req.params.id],
+    (err) => {
+      if (err) return res.status(500).json({ error: "Delete failed" });
+      res.json({ success: true });
     }
-
-    res.json({ success: true });
-  });
+  );
 });
 
 /* ======================
-   404 HANDLER (LAST)
+   404 HANDLER
 ====================== */
 app.use((req, res) => {
-  res.status(404).json({
-    error: "Route not found",
-    path: req.originalUrl,
-  });
+  res.status(404).json({ error: "Route not found" });
 });
 
 /* ======================
-   START SERVER (RAILWAY)
+   START SERVER
 ====================== */
 const PORT = process.env.PORT;
-app.listen(PORT, () => {
-  console.log(`🚀 Backend running on port ${PORT}`);
-});
+app.listen(PORT, () =>
+  console.log(`🚀 Backend running on port ${PORT}`)
+);
