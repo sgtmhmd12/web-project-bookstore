@@ -27,13 +27,13 @@ const Books = ({ addToCart }) => {
     const fetchBooks = async () => {
       try {
         const res = await axios.get(`${API_URL}/books`);
-       setBooks(
+        setBooks(
   res.data.map((b) => ({
     ...b,
-    id: b.id ?? b.ID, // 🔥 SAFETY NET
+    id: b.id ?? b.ID, // 🔥 GUARANTEED FIX
   }))
 );
- // backend already returns { id: ... }
+// backend already returns { id: ... }
       } catch (err) {
         console.error("Failed to fetch books:", err);
         alert("Failed to load books");

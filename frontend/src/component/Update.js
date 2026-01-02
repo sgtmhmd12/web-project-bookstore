@@ -6,7 +6,10 @@ import { auth } from "../firebase";
 const API_URL = "https://web-project-bookstore-production.up.railway.app";
 
 const Update = () => {
-  const { id } = useParams();
+ if (!id) {
+  alert("Invalid book ID");
+  window.location.href = "/books";
+}
   const navigate = useNavigate();
 
   const [title, setTitle] = useState("");
