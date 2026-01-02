@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
+/* ✅ DEFINE API URL (NO /api) */
+const API_URL = "https://web-project-bookstore-production.up.railway.app";
+
 function BookDetails({ addToCart }) {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -9,18 +12,19 @@ function BookDetails({ addToCart }) {
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ======================
-  // LOAD BOOK FROM BACKEND
-  // ======================
+  /* ======================
+     LOAD BOOK
+  ====================== */
   useEffect(() => {
     axios
       .get(`${API_URL}/books/${id}`)
       .then((res) => {
         setBook(res.data);
-        setLoading(false);
       })
       .catch((err) => {
         console.error("Error loading book:", err);
+      })
+      .finally(() => {
         setLoading(false);
       });
   }, [id]);
@@ -33,34 +37,33 @@ function BookDetails({ addToCart }) {
     return <h3>Book not found</h3>;
   }
 
-  // ======================
-  // ADD TO CART
-  // ======================
+  /* ======================
+     ADD TO CART
+  ====================== */
   const handleAddToCart = () => {
     addToCart(book);
     navigate("/cart");
   };
 
-  // ======================
   return (
     <div className="row">
       <div className="col-md-5">
-        {book.coverUrl && (
+        {book.cover && (
           <img
-            src={book.coverUrl}
-            alt={book.Title}
+            src={book.cover}
+            alt={book.title}
             className="img-fluid rounded shadow"
           />
         )}
       </div>
 
       <div className="col-md-7">
-        <h2>{book.Title}</h2>
+        <h2>{book.title}</h2>
         <h5 className="text-muted">{book.author}</h5>
 
         <p className="mt-3">{book.description}</p>
 
-        <h4 className="text-success">${book.price}</h4>
+        <h4 className="text-success">${Number(book.price).toFixed(2)}</h4>
 
         <button
           className="btn btn-primary mt-3"
