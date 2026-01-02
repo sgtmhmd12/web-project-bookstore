@@ -23,27 +23,30 @@ const Books = ({ addToCart }) => {
   /* ======================
      FETCH BOOKS
   ====================== */
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/books`);
-        setBooks(
-  res.data.map((b) => ({
-    ...b,
-    id: b.id ?? b.ID, // 🔥 GUARANTEED FIX
-  }))
-);
-// backend already returns { id: ... }
-      } catch (err) {
-        console.error("Failed to fetch books:", err);
-        alert("Failed to load books");
-      } finally {
-        setLoading(false);
-      }
-    };
+useEffect(() => {
+  const fetchBooks = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/books`);
+      setBooks(
+        res.data.map((b) => ({
+          id: b.id ?? b.ID,   // 🔥 normalize once
+          Title: b.Title,
+          author: b.author,
+          price: b.price,
+          description: b.description,
+          cover: b.cover,
+        }))
+      );
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load books");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchBooks();
-  }, []);
+  fetchBooks();
+}, []);
 
   /* ======================
      DELETE BOOK
