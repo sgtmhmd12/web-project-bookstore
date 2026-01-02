@@ -4,7 +4,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import SafeImage from "./SafeImage";
 
 /* ✅ API URL (NO /api) */
-const API_URL = "https://web-project-bookstore-production.up.railway.app";
+const API_URL =
+  "https://web-project-bookstore-production.up.railway.app/api";
+
 
 function BookDetails({ addToCart }) {
   const { id } = useParams();

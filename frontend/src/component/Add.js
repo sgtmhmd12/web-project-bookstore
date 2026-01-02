@@ -5,7 +5,7 @@ import { API_URL } from "../api";
 
 const Add = () => {
   const [book, setBook] = useState({
-    Title: "",
+    title: "",
     author: "",
     price: "",
     description: "",
@@ -34,7 +34,7 @@ const Add = () => {
     setLoading(true);
 
     const formData = new FormData();
-    formData.append("Title", book.Title);
+    formData.append("title", book.title);       // ✅ FIXED
     formData.append("author", book.author);
     formData.append("price", book.price);
     formData.append("description", book.description);
@@ -62,9 +62,7 @@ const Add = () => {
             <div className="card-body">
               <h3 className="fw-bold mb-4">📘 Add New Book</h3>
 
-              {error && (
-                <div className="alert alert-danger">{error}</div>
-              )}
+              {error && <div className="alert alert-danger">{error}</div>}
 
               <form onSubmit={handleSubmit}>
                 {/* TITLE */}
@@ -72,7 +70,7 @@ const Add = () => {
                   <label className="form-label">Title</label>
                   <input
                     type="text"
-                    name="Title"
+                    name="title"          // ✅ FIXED
                     className="form-control"
                     placeholder="Enter book title"
                     onChange={handleChange}

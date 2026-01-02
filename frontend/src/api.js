@@ -1,2 +1,2 @@
 export const API_URL =
-  "https://web-project-bookstore-production.up.railway.app";
+  "https://web-project-bookstore-production.up.railway.app/api";

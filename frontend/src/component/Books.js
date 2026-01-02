@@ -5,7 +5,9 @@ import { auth } from "../firebase";
 import SafeImage from "./SafeImage";
 
 /* ✅ API URL (NO /api) */
-const API_URL = "https://web-project-bookstore-production.up.railway.app";
+const API_URL =
+  "https://web-project-bookstore-production.up.railway.app/api";
+
 
 const Books = ({ addToCart }) => {
   const [books, setBooks] = useState([]);
