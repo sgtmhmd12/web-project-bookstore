@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import "./App.css";
 import "./Style.css";
@@ -23,14 +23,27 @@ import Login from "./component/Login";
 function AppContent() {
   const location = useLocation();
 
-  const [cart, setCart] = useState([]);
+  // ✅ load cart from localStorage
+  const [cart, setCart] = useState(() => {
+    const saved = localStorage.getItem("cart");
+    return saved ? JSON.parse(saved) : [];
+  });
 
-  /* ADD TO CART */
+  // ✅ save cart on change
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }, [cart]);
+
+  /* ADD TO CART (no duplicates) */
   const addToCart = (book) => {
-    setCart((prev) => [...prev, book]);
+    setCart((prev) => {
+      const exists = prev.find((b) => b.id === book.id);
+      if (exists) return prev; // prevent duplicate
+      return [...prev, book];
+    });
   };
 
-  /* REMOVE FROM CART (FIXED id) */
+  /* REMOVE FROM CART */
   const removeFromCart = (id) => {
     setCart((prev) => prev.filter((b) => b.id !== id));
   };

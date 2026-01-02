@@ -16,19 +16,19 @@ function Cart({ cart, removeFromCart }) {
 
       {cart.map((item) => (
         <div
-          key={item.ID}
+          key={item.id} // ✅ FIX
           style={{
             border: "1px solid #ccc",
             padding: 10,
             marginBottom: 10,
           }}
         >
-          <h5>{item.Title}</h5>
+          <h5>{item.title}</h5> {/* ✅ FIX */}
           <p>${Number(item.price)}</p>
 
           <button
             className="btn btn-danger btn-sm"
-            onClick={() => removeFromCart(item.ID)}
+            onClick={() => removeFromCart(item.id)} // ✅ FIX
           >
             Remove
           </button>

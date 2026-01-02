@@ -6,7 +6,6 @@ import { auth } from "../firebase";
 const API_URL = "https://web-project-bookstore-production.up.railway.app";
 
 const Update = () => {
-  // ✅ hooks FIRST
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -21,7 +20,6 @@ const Update = () => {
      FETCH BOOK
   ====================== */
   useEffect(() => {
-    // ✅ guard AFTER hooks
     if (!id) {
       alert("Invalid book ID");
       navigate("/books");
@@ -32,19 +30,10 @@ const Update = () => {
       try {
         const res = await axios.get(`${API_URL}/books/${id}`);
 
-        // 🔥 normalize backend response
-        const book = {
-          id: res.data.id ?? res.data.ID,
-          Title: res.data.Title,
-          author: res.data.author,
-          price: res.data.price,
-          description: res.data.description,
-        };
-
-        setTitle(book.Title);
-        setAuthor(book.author);
-        setPrice(book.price);
-        setDescription(book.description);
+        setTitle(res.data.title);
+        setAuthor(res.data.author);
+        setPrice(res.data.price);
+        setDescription(res.data.description);
       } catch (err) {
         console.error("Failed to load book:", err);
         alert("Failed to load book");
@@ -70,13 +59,18 @@ const Update = () => {
 
     try {
       const formData = new FormData();
-      formData.append("Title", title);
+      formData.append("title", title);       // ✅ FIXED
       formData.append("author", author);
       formData.append("price", price);
       formData.append("description", description);
-      if (file) formData.append("cover", file);
 
-      await axios.post(`${API_URL}/books/update/${id}`, formData);
+      if (file) {
+        formData.append("cover", file);
+      }
+
+      await axios.post(`${API_URL}/books/update/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       navigate("/books");
     } catch (err) {
@@ -85,15 +79,8 @@ const Update = () => {
     }
   };
 
-  /* ======================
-     UI STATES
-  ====================== */
   if (loading) {
-    return (
-      <div style={{ textAlign: "center", marginTop: "50px" }}>
-        Loading...
-      </div>
-    );
+    return <div style={{ textAlign: "center", marginTop: 50 }}>Loading...</div>;
   }
 
   return (
@@ -135,10 +122,7 @@ const Update = () => {
             required
           />
 
-          <input
-            type="file"
-            onChange={(e) => setFile(e.target.files[0])}
-          />
+          <input type="file" onChange={(e) => setFile(e.target.files[0])} />
 
           <div style={styles.actions}>
             <button type="submit" style={styles.primary}>
@@ -155,9 +139,6 @@ const Update = () => {
   );
 };
 
-/* ======================
-   STYLES
-====================== */
 const styles = {
   page: {
     minHeight: "100vh",
