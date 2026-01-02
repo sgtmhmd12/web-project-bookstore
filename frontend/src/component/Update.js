@@ -19,32 +19,32 @@ const Update = () => {
   /* ======================
      FETCH BOOK
   ====================== */
-  useEffect(() => {
-    if (!id) {
-      alert("Invalid book ID");
+useEffect(() => {
+  if (!id) {
+    alert("Invalid book ID");
+    navigate("/books");
+    return;
+  }
+
+  const fetchBook = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/books/${id}`);
+
+      setTitle(res.data.title);        // ✅ lowercase
+      setAuthor(res.data.author);
+      setPrice(res.data.price);
+      setDescription(res.data.description);
+    } catch (err) {
+      console.error("FETCH BOOK ERROR:", err.response || err);
+      alert("Failed to load book");
       navigate("/books");
-      return;
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const fetchBook = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/books/${id}`);
-
-        setTitle(res.data.title);
-        setAuthor(res.data.author);
-        setPrice(res.data.price);
-        setDescription(res.data.description);
-      } catch (err) {
-        console.error("Failed to load book:", err);
-        alert("Failed to load book");
-        navigate("/books");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBook();
-  }, [id, navigate]);
+  fetchBook();
+}, [id, navigate]);
 
   /* ======================
      UPDATE BOOK
