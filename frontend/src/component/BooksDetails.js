@@ -14,7 +14,7 @@ function BookDetails({ addToCart }) {
   // ======================
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/books/${id}`)
+      .get(`${API_URL}/books/${id}`)
       .then((res) => {
         setBook(res.data);
         setLoading(false);

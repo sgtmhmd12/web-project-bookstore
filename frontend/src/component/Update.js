@@ -4,8 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { auth } from "../firebase";
 
 /* ✅ API URL WITH /api */
-const API_URL =
-  "https://web-project-bookstore-production.up.railway.app/api";
+const API_URL = "https://web-project-bookstore-production.up.railway.app";
 
 const Update = () => {
   const { id } = useParams();

@@ -4,8 +4,9 @@ import { Link } from "react-router-dom";
 import { auth } from "../firebase";
 
 /* ✅ API URL WITH /api */
-const API_URL =
-  "https://web-project-bookstore-production.up.railway.app/api";
+const API_URL = "https://web-project-bookstore-production.up.railway.app";
+
+
 
 const Books = ({ addToCart }) => {
   const [books, setBooks] = useState([]);
