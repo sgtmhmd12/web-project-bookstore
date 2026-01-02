@@ -5,6 +5,7 @@ import mysql from "mysql2";
 import cors from "cors";
 import multer from "multer";
 import fs from "fs";
+import path from "path";
 
 const app = express();
 
@@ -18,10 +19,12 @@ app.use(express.json());
    IMAGES FOLDER
 ====================== */
 const IMAGE_DIR = "images";
+
 if (!fs.existsSync(IMAGE_DIR)) {
   fs.mkdirSync(IMAGE_DIR);
 }
-app.use("/images", express.static(IMAGE_DIR));
+
+app.use("/images", express.static(path.resolve(IMAGE_DIR)));
 
 /* ======================
    MULTER CONFIG
@@ -32,17 +35,18 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
+
 const upload = multer({ storage });
 
 /* ======================
-   MYSQL CONNECTION
+   MYSQL CONNECTION (RAILWAY)
 ====================== */
 const db = mysql.createPool({
-  host: "mysql.railway.internal",
-  user: "root",
-  password: "KvxJwhfgdUaxvKKDeKWRQvipFqsHHsHD",
-  database: "railway",
-  port: 3306,
+  host: process.env.MYSQLHOST || "mysql.railway.internal",
+  user: process.env.MYSQLUSER || "root",
+  password: process.env.MYSQLPASSWORD || "YOUR_PASSWORD",
+  database: process.env.MYSQLDATABASE || "railway",
+  port: process.env.MYSQLPORT || 3306,
 });
 
 /* ======================
@@ -56,20 +60,20 @@ app.get("/", (req, res) => {
    GET ALL BOOKS
 ====================== */
 app.get("/books", (req, res) => {
-  db.query("SELECT * FROM books", (err, data) => {
+  db.query("SELECT * FROM books", (err, rows) => {
     if (err) {
       console.error("SELECT ERROR:", err);
-      return res.status(500).json(err);
+      return res.status(500).json({ error: "Database error" });
     }
 
-    const books = data.map((b) => ({
-      id: b.ID, // ✅ normalize ID → id
-      Title: b.Title,
+    const books = rows.map((b) => ({
+      id: b.ID,
+      title: b.Title,
       author: b.author,
       price: b.price,
       description: b.description,
       cover: b.cover
-        ? `https://web-project-bookstore-production.up.railway.app/images/${b.cover}`
+        ? `${req.protocol}://${req.get("host")}/images/${b.cover}`
         : null,
     }));
 
@@ -81,45 +85,57 @@ app.get("/books", (req, res) => {
    GET BOOK BY ID
 ====================== */
 app.get("/books/:id", (req, res) => {
-  db.query(
-    "SELECT * FROM books WHERE ID = ?",
-    [req.params.id],
-    (err, data) => {
-      if (err || data.length === 0) {
-        return res.status(404).json({ message: "Book not found" });
-      }
+  const { id } = req.params;
 
-      const b = data[0];
-      res.json({
-        id: b.ID, // ✅ normalize
-        Title: b.Title,
-        author: b.author,
-        price: b.price,
-        description: b.description,
-        cover: b.cover
-          ? `https://web-project-bookstore-production.up.railway.app/images/${b.cover}`
-          : null,
-      });
+  db.query("SELECT * FROM books WHERE ID = ?", [id], (err, rows) => {
+    if (err) {
+      console.error("SELECT BY ID ERROR:", err);
+      return res.status(500).json({ error: "Database error" });
     }
-  );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    const b = rows[0];
+
+    res.json({
+      id: b.ID,
+      title: b.Title,
+      author: b.author,
+      price: b.price,
+      description: b.description,
+      cover: b.cover
+        ? `${req.protocol}://${req.get("host")}/images/${b.cover}`
+        : null,
+    });
+  });
 });
 
 /* ======================
    ADD BOOK
 ====================== */
 app.post("/books/create", upload.single("cover"), (req, res) => {
-  const { Title, author, price, description } = req.body;
+  const { title, author, price, description } = req.body;
   const cover = req.file ? req.file.filename : null;
 
+  if (!title || !author || !price) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
   db.query(
-    "INSERT INTO books (Title, author, price, description, cover) VALUES (?,?,?,?,?)",
-    [Title, author, price, description, cover],
+    "INSERT INTO books (Title, author, price, description, cover) VALUES (?, ?, ?, ?, ?)",
+    [title, author, price, description, cover],
     (err, result) => {
       if (err) {
         console.error("INSERT ERROR:", err);
-        return res.status(500).json(err);
+        return res.status(500).json({ error: "Insert failed" });
       }
-      res.json({ success: true, id: result.insertId });
+
+      res.json({
+        success: true,
+        id: result.insertId,
+      });
     }
   );
 });
@@ -128,10 +144,11 @@ app.post("/books/create", upload.single("cover"), (req, res) => {
    UPDATE BOOK
 ====================== */
 app.post("/books/update/:id", upload.single("cover"), (req, res) => {
-  const { Title, author, price, description } = req.body;
   const { id } = req.params;
+  const { title, author, price, description } = req.body;
 
-  let sql, values;
+  let sql;
+  let values;
 
   if (req.file) {
     sql = `
@@ -139,21 +156,22 @@ app.post("/books/update/:id", upload.single("cover"), (req, res) => {
       SET Title=?, author=?, price=?, description=?, cover=?
       WHERE ID=?
     `;
-    values = [Title, author, price, description, req.file.filename, id];
+    values = [title, author, price, description, req.file.filename, id];
   } else {
     sql = `
       UPDATE books
       SET Title=?, author=?, price=?, description=?
       WHERE ID=?
     `;
-    values = [Title, author, price, description, id];
+    values = [title, author, price, description, id];
   }
 
   db.query(sql, values, (err) => {
     if (err) {
       console.error("UPDATE ERROR:", err);
-      return res.status(500).json(err);
+      return res.status(500).json({ error: "Update failed" });
     }
+
     res.json({ success: true });
   });
 });
@@ -162,25 +180,32 @@ app.post("/books/update/:id", upload.single("cover"), (req, res) => {
    DELETE BOOK
 ====================== */
 app.delete("/books/delete/:id", (req, res) => {
-  db.query("DELETE FROM books WHERE ID = ?", [req.params.id], (err) => {
+  const { id } = req.params;
+
+  db.query("DELETE FROM books WHERE ID = ?", [id], (err) => {
     if (err) {
       console.error("DELETE ERROR:", err);
-      return res.status(500).json(err);
+      return res.status(500).json({ error: "Delete failed" });
     }
+
     res.json({ success: true });
   });
 });
 
 /* ======================
-   START SERVER
+   404 HANDLER (LAST)
 ====================== */
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Backend running on port ${PORT}`);
-});
 app.use((req, res) => {
   res.status(404).json({
     error: "Route not found",
     path: req.originalUrl,
   });
+});
+
+/* ======================
+   START SERVER (RAILWAY)
+====================== */
+const PORT = process.env.PORT;
+app.listen(PORT, () => {
+  console.log(`🚀 Backend running on port ${PORT}`);
 });
